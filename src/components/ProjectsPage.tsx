@@ -80,7 +80,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       name: 'Kalyan Silks',
-      url: '#',
+      url: 'https://kalyansilks.com/',
       role: 'Magento Developer',
       description: 'Traditional Indian textiles and sarees',
       details: 'Developed an elegant eCommerce platform for traditional Indian textiles with custom fabric visualization, size guides, and cultural design elements that resonate with the target audience.',
@@ -92,7 +92,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       name: 'Anjalifab',
-      url: '#',
+      url: 'https://www.anjalifab.com/',
       role: 'Magento Developer',
       description: 'Fabric manufacturing and wholesale',
       details: 'Built a B2B eCommerce platform for fabric manufacturers with bulk ordering capabilities, custom pricing tiers, and integrated inventory management for wholesale operations.',
@@ -104,7 +104,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       name: 'Nabdilath Gmart',
-      url: '#',
+      url: 'https://nandilathgmart.com/',
       role: 'Magento Developer',
       description: 'Local grocery and convenience store',
       details: 'Created a local grocery eCommerce platform with real-time inventory tracking, local delivery integration, and customer loyalty programs for repeat customers.',
@@ -165,82 +165,6 @@ const ProjectsPage: React.FC = () => {
           })}
         </div>
 
-        {/* Featured Projects */}
-        <div className="mb-16 animate-fade-in-up animation-delay-500">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Featured Projects</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredProjects.map((project, index) => (
-              <div 
-                key={index}
-                className="group bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden transform hover:-translate-y-2"
-              >
-                <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden relative">
-                  <img 
-                    src={project.image} 
-                    alt={project.name}
-                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="inline-flex items-center px-3 py-1 text-xs font-semibold text-white bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full">
-                      <Star className="h-3 w-3 mr-1" />
-                      Featured
-                    </span>
-                  </div>
-                  <div className="absolute top-4 right-4">
-                    <span className="inline-block px-3 py-1 text-xs font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-500 rounded-full">
-                      {project.category}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
-                      {project.name}
-                    </h3>
-                    <div className="flex items-center text-gray-500 text-sm">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      {project.year}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center mb-3">
-                    <Users className="h-4 w-4 text-blue-600 mr-2" />
-                    <span className="text-sm font-medium text-blue-600">{project.role}</span>
-                  </div>
-                  
-                  <p className="text-gray-600 mb-4 leading-relaxed">{project.details}</p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.technologies.slice(0, 3).map((tech, techIndex) => (
-                      <span key={techIndex} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105"
-                    >
-                      View Live Site
-                      <ExternalLink className="h-4 w-4 ml-2" />
-                    </a>
-                    {project.role.includes('Lead') && (
-                      <div className="flex items-center text-yellow-600">
-                        <Award className="h-4 w-4 mr-1" />
-                        <span className="text-xs font-medium">Leadership</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Search and Filter */}
         <div className="mb-12 animate-fade-in-up animation-delay-700">
           <div className="bg-white rounded-2xl shadow-xl p-6">
@@ -271,9 +195,9 @@ const ProjectsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* All Projects Grid */}
+        {/* Featured Projects */}
         <div className="animate-fade-in-up animation-delay-1000">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">All Projects</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Featured Projects</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProjects.map((project, index) => (
               <div 

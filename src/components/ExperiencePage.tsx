@@ -91,10 +91,14 @@ const ExperiencePage: React.FC = () => {
             from developer to team leader
           </p>
           <div className="mt-8">
-            <button className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
+            <a
+              href="/resume.pdf"
+              download
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            >
               <Download className="h-5 w-5 mr-2" />
               Download Resume
-            </button>
+            </a>
           </div>
         </div>
 

@@ -119,6 +119,13 @@ const HomePage: React.FC = () => {
                 <div className="absolute -bottom-4 -left-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full p-4 shadow-lg animate-pulse">
                   <Code2 className="h-8 w-8 text-white" />
                 </div>
+                {/* <div className="absolute -bottom-4 -left-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full p-4 shadow-lg animate-pulse">
+                  <img
+                    src="/Adobe_Certified_Professional_Experience_Cloud_products_Digital_Badge.png"
+                    alt="Logo"
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                </div> */}
                 <div className="absolute top-1/2 -left-8 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full p-3 shadow-lg animate-ping">
                   <Star className="h-6 w-6 text-white" />
                 </div>
@@ -245,7 +252,7 @@ const HomePage: React.FC = () => {
               to="/projects"
               className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-full hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             >
-              View All Projects
+              View Some more
               <ArrowRight className="h-5 w-5 ml-2" />
             </Link>
           </div>
@@ -267,19 +274,49 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               { 
-                image: '/WhatsApp Image 2025-06-14 at 15.25.02.jpeg', 
+                image: '/WhatsApp Image 2025-06-14 at 15.25.01.jpeg', 
                 title: 'Award Recognition',
-                description: 'Receiving recognition for outstanding performance'
+                description: 'Receiving recognition for outstanding performance from Ceymox, India'
               },
               { 
-                image: '/WhatsApp Image 2025-06-14 at 15.25.08.jpeg', 
-                title: 'Team Achievement',
-                description: 'Celebrating success with the development team'
+                image: '/WhatsApp Image 2025-06-14 at 15.25.02 (1).jpeg', 
+                title: 'Best Employee of the Year',
+                description: 'Receiving Token of love from Ceymox, India'
+              },
+              { 
+                image: '/DSC08053.JPG', 
+                title: 'Award Night - Kochi',
+                description: 'Emvigo Half Yearly Awards Program, Kochi'
+              },
+              { 
+                image: '/WhatsApp Image 2025-06-14 at 15.27.39.jpeg', 
+                title: 'Let Me Talk Some thing',
+                description: 'Meet Magento India, Pune'
+              },
+              { 
+                image: '/WhatsApp Image 2021-12-24 at 11.16.57 PM (1).jpeg', 
+                title: 'Ceymox Awards',
+                description: 'Ceymox Award Program, Kochi'
               },
               { 
                 image: '/WhatsApp Image 2025-06-14 at 15.25.18.jpeg', 
-                title: 'Conference Speaking',
-                description: 'Speaking at Meet Magento 2025 in Pune, India'
+                title: 'Magento Event',
+                description: 'Participated in Magento Event in Gujarath, India'
+              },
+              { 
+                image: '/meetmagento2024.png', 
+                title: 'Meet Magento 2024',
+                description: 'Participated in Meet Magento 2024 in Ahmedabad, India'
+              },
+              { 
+                image: '/WhatsApp Image 2025-06-14 at 15.25.19.jpeg', 
+                title: 'Meet Magento 2025',
+                description: 'Participated in Meet Magento 2025 in Pune, India'
+              },
+              { 
+                image: '/FB_IMG_1749894721770.jpg', 
+                title: 'Meet Magento Pune',
+                description: 'Participated in Meet Magento 2025 in Pune, India'
               }
             ].map((event, index) => (
               <div 

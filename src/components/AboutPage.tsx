@@ -13,23 +13,59 @@ const AboutPage: React.FC = () => {
   ];
 
   const achievements = [
-    {
-      title: 'Meet Magento Speaker',
-      description: 'Spoke at Meet Magento 2025 conference in Pune, India',
-      image: '/WhatsApp Image 2025-06-14 at 15.25.18.jpeg',
+    { 
+      image: '/WhatsApp Image 2025-06-14 at 15.25.01.jpeg', 
+      title: 'Award Recognition',
+      description: 'Receiving recognition for outstanding performance from Ceymox, India',
       year: '2025'
     },
-    {
-      title: 'Team Excellence Award',
-      description: 'Recognized for outstanding team leadership and project delivery',
-      image: '/WhatsApp Image 2025-06-14 at 15.25.08.jpeg',
+    { 
+      image: '/WhatsApp Image 2025-06-14 at 15.25.02 (1).jpeg', 
+      title: 'Best Employee of the Year',
+      description: 'Receiving Token of love from Ceymox, India',
+      year: '2025'
+    },
+    { 
+      image: '/DSC08053.JPG', 
+      title: 'Award Night - Kochi',
+      description: 'Emvigo Half Yearly Awards Program, Kochi',
       year: '2024'
     },
-    {
-      title: 'Performance Recognition',
-      description: 'Awarded for exceptional performance and client satisfaction',
-      image: '/WhatsApp Image 2025-06-14 at 15.25.02.jpeg',
+    { 
+      image: '/WhatsApp Image 2025-06-14 at 15.27.39.jpeg', 
+      title: 'Let Me Talk Some thing',
+      description: 'Meet Magento India, Pune',
+      year: '2025'
+    },
+    { 
+      image: '/WhatsApp Image 2021-12-24 at 11.16.57 PM (1).jpeg', 
+      title: 'Ceymox Awards',
+      description: 'Ceymox Award Program, Kochi',
+      year: '2021'
+    },
+    { 
+      image: '/WhatsApp Image 2025-06-14 at 15.25.18.jpeg', 
+      title: 'Magento Event',
+      description: 'Participated in Magento Event in Gujarath, India',
+      year: '2025'
+    },
+    { 
+      image: '/meetmagento2024.png', 
+      title: 'Meet Magento 2024',
+      description: 'Participated in Meet Magento 2024 in Ahmedabad, India',
       year: '2024'
+    },
+    { 
+      image: '/WhatsApp Image 2025-06-14 at 15.25.19.jpeg', 
+      title: 'Meet Magento 2025',
+      description: 'Participated in Meet Magento 2025 in Pune, India',
+      year: '2025'
+    },
+    { 
+      image: '/FB_IMG_1749894721770.jpg', 
+      title: 'Meet Magento Pune',
+      description: 'Participated in Meet Magento 2025 in Pune, India',
+      year: '2025'
     }
   ];
 
@@ -198,7 +234,7 @@ const AboutPage: React.FC = () => {
               <div className="text-center">
                 <div className="w-20 h-20 mx-auto mb-4 animate-pulse">
                   <img 
-                    src="/adobe-certified-professional-badge.png" 
+                    src="/Adobe_Certified_Professional_Experience_Cloud_products_Digital_Badge.png" 
                     alt="Adobe Certified Professional"
                     className="w-full h-full object-contain"
                   />

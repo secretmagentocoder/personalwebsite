@@ -31,9 +31,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2 group">
-              <div className="bg-blue-600 p-2 rounded-lg group-hover:bg-blue-700 transition-colors duration-200">
-                <Code className="h-5 w-5 text-white" />
-              </div>
+            <img
+              src="/Adobe_Certified_Professional_Experience_Cloud_products_Digital_Badge.png"
+              alt="Logo"
+              className="h-10 w-10 rounded-lg object-cover group-hover:brightness-110 transition duration-200"
+            />
               <span className="text-xl font-bold text-gray-900">ANAS KP</span>
             </Link>
 
@@ -153,7 +155,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 ANAS KP. All rights reserved.</p>
+            <p>&copy; 2025 ANAS KP. All rights reserved.</p>
           </div>
         </div>
       </footer>
