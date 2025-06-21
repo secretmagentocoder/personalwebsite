@@ -40,13 +40,13 @@ const ContactPage: React.FC = () => {
     try {
       // EmailJS configuration - REPLACE THESE WITH YOUR ACTUAL VALUES
       const serviceID = 'service_68afgse'; // Replace with your EmailJS service ID
-      const templateID = 'template_8lo6bpr'; // Replace with your EmailJS template ID
+      const templateID = 'template_vym6kik'; // Replace with your EmailJS template ID
       const publicKey = 'rWAnWDHGYERdj6-7I'; // Replace with your EmailJS public key
 
       // Check if EmailJS is properly configured
-      if (serviceID === 'service_68afgse' || templateID === 'template_8lo6bpr') {
-        throw new Error('EmailJS not configured. Please set up your EmailJS credentials.');
-      }
+      // if (serviceID === 'service_68afgse' || templateID === 'template_8lo6bpr') {
+      //   throw new Error('EmailJS not configured. Please set up your EmailJS credentials.');
+      // }
 
       // Prepare template parameters
       const templateParams = {
