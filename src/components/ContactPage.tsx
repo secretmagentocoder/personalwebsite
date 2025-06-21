@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle, ExternalLink, Linkedin, Github, MessageCircle, Clock, Award, Zap } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle, ExternalLink, Linkedin, Github, MessageCircle, Clock, Award, Zap, AlertCircle, Loader } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ const ContactPage: React.FC = () => {
     message: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -17,23 +20,78 @@ const ContactPage: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-    setIsSubmitted(true);
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   console.log('Form submitted:', formData);
+  //   setIsSubmitted(true);
     
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 3000);
+  //   setTimeout(() => {
+  //     setIsSubmitted(false);
+  //     setFormData({ name: '', email: '', subject: '', message: '' });
+  //   }, 3000);
+  // };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Reset states
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // EmailJS configuration - REPLACE THESE WITH YOUR ACTUAL VALUES
+      const serviceID = 'service_68afgse'; // Replace with your EmailJS service ID
+      const templateID = 'template_8lo6bpr'; // Replace with your EmailJS template ID
+      const publicKey = 'rWAnWDHGYERdj6-7I'; // Replace with your EmailJS public key
+
+      // Check if EmailJS is properly configured
+      if (serviceID === 'service_68afgse' || templateID === 'template_8lo6bpr') {
+        throw new Error('EmailJS not configured. Please set up your EmailJS credentials.');
+      }
+
+      // Prepare template parameters
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        to_email: 'hello@anaskp.com', // Your Hostinger email
+      };
+
+      // Send email using EmailJS
+      const result = await emailjs.send(
+        serviceID,
+        templateID,
+        templateParams,
+        publicKey
+      );
+
+      console.log('Email sent successfully:', result);
+      setIsSubmitted(true);
+      
+      // Reset form after 5 seconds
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      }, 5000);
+
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      if (error instanceof Error && error.message.includes('EmailJS not configured')) {
+        setError('EmailJS is not configured yet. Please check the setup instructions below.');
+      } else {
+        setError('Failed to send message. Please try again or contact me directly.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const contactInfo = [
     {
       icon: Mail,
       title: 'Email',
-      value: 'anasmagento@gmail.com',
-      link: 'mailto:anasmagento@gmail.com',
+      value: 'hello@anaskp.com',
+      link: 'mailto:hello@anaskp.com',
       color: 'from-blue-500 to-cyan-500'
     },
     {
@@ -201,12 +259,29 @@ const ContactPage: React.FC = () => {
                   ></textarea>
                 </div>
                 
+                {error && (
+                  <div className="flex items-center bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" role="alert">
+                    <AlertCircle className="h-5 w-5 mr-2" />
+                    <span>{error}</span>
+                  </div>
+                )}
+                
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center transform hover:scale-105 hover:shadow-xl"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center transform hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Send className="h-5 w-5 mr-2" />
-                  Send Message
+                  {isLoading ? (
+                    <>
+                      <Loader className="animate-spin h-5 w-5 mr-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-5 w-5 mr-2" />
+                      Send Message
+                    </>
+                  )}
                 </button>
               </form>
             ) : (
@@ -337,7 +412,7 @@ const ContactPage: React.FC = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
-                  href="mailto:anasmagento@gmail.com"
+                  href="mailto:hello@anaskp.com"
                   className="inline-flex items-center px-8 py-4 bg-white text-purple-600 font-semibold rounded-full hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
                 >
                   <Mail className="h-5 w-5 mr-2" />
