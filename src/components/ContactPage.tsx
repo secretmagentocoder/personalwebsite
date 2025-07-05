@@ -54,7 +54,7 @@ const ContactPage: React.FC = () => {
         from_email: formData.email,
         subject: formData.subject,
         message: formData.message,
-        to_email: 'hello@anaskp.com', // Your Hostinger email
+        to_email: 'anasmagento@gmail.com', // Your Hostinger email
       };
 
       // Send email using EmailJS
@@ -90,8 +90,8 @@ const ContactPage: React.FC = () => {
     {
       icon: Mail,
       title: 'Email',
-      value: 'hello@anaskp.com',
-      link: 'mailto:hello@anaskp.com',
+      value: 'anasmagento@gmail.com',
+      link: 'mailto:anasmagento@gmail.com',
       color: 'from-blue-500 to-cyan-500'
     },
     {
@@ -412,7 +412,7 @@ const ContactPage: React.FC = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
-                  href="mailto:hello@anaskp.com"
+                  href="mailto:anasmagento@gmail.com"
                   className="inline-flex items-center px-8 py-4 bg-white text-purple-600 font-semibold rounded-full hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
                 >
                   <Mail className="h-5 w-5 mr-2" />
