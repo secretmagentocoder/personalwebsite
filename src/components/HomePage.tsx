@@ -5,12 +5,12 @@ import { ArrowRight, Download, Mail, ExternalLink, Award, Users, Code2, Star, Za
 const HomePage: React.FC = () => {
   const featuredProjects = [
     {
-      name: 'Thomsun Music House',
-      url: 'https://www.thomsunmusichouse.com/',
+      name: 'Sofiqe',
+      url: 'https://sofiqe.com/',
       role: 'Magento Architect & Team Lead',
-      description: 'Indian eCommerce site for musical instruments',
-      image: '/thomsunMusicHouse.png',
-      category: 'Music & Entertainment'
+      description: 'UK-based cosmetics eCommerce store',
+      image: '/sofiq.webp',
+      category: 'Beauty & Cosmetics'
     },
     {
       name: 'Aurafoods',
@@ -21,13 +21,14 @@ const HomePage: React.FC = () => {
       category: 'Food & Grocery'
     },
     {
-      name: 'Sofiqe',
-      url: 'https://sofiqe.com/',
+      name: 'Thomsun Music House',
+      url: 'https://www.thomsunmusichouse.com/',
       role: 'Magento Architect & Team Lead',
-      description: 'UK-based cosmetics eCommerce store',
-      image: '/sofiq.webp',
-      category: 'Beauty & Cosmetics'
-    }
+      description: 'Indian eCommerce site for musical instruments',
+      image: '/thomsunMusicHouse.png',
+      category: 'Music & Entertainment'
+    },
+    
   ];
 
   const services = [

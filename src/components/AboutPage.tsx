@@ -242,7 +242,7 @@ const AboutPage: React.FC = () => {
                 <div className="font-medium text-gray-900 mb-1">Adobe Certified Professional</div>
                 <div className="text-gray-600 mb-3 text-sm">Magento Commerce Developer</div>
                 <a
-                  href="https://www.credly.com/badges/5a5289d2-1760-4fdb-8da6-9c1fba46342f"
+                  href="https://certification.adobe.com/credential/verify/ba1f78ad-c547-4214-aef2-a8d84e101890"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white font-medium rounded-lg hover:from-red-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105"

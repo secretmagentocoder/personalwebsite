@@ -79,7 +79,7 @@ const SkillsPage: React.FC = () => {
       name: 'Adobe Certified Professional - Magento Commerce Developer',
       issuer: 'Adobe',
       year: '2023',
-      link: 'https://www.credly.com/badges/5a5289d2-1760-4fdb-8da6-9c1fba46342f',
+      link: 'https://certification.adobe.com/credential/verify/ba1f78ad-c547-4214-aef2-a8d84e101890',
       verified: true
     }
   ];
