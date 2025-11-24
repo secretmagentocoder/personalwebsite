@@ -1,9 +1,32 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Award, Globe, Languages, MapPin, Calendar, CheckCircle, Camera, Users, Trophy, Star } from 'lucide-react';
+import { useContactModal } from '../context/ContactModalContext';
+import { useLocation } from 'react-router-dom';
 
 const AboutPage: React.FC = () => {
+  const { openModal } = useContactModal();
+  const location = useLocation();
+
+  // Scroll to hash anchor when component mounts or hash changes
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.querySelector(location.hash);
+      if (element) {
+        setTimeout(() => {
+          const headerOffset = 100; // Account for fixed header
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }, 100);
+      }
+    }
+  }, [location.hash]);
   const tools = [
-    'Git', 'VS Code', 'Jira', 'Postman', 'phpMyAdmin', 'Docker', 'Composer', 'npm/yarn'
+    'Git', 'VS Code', 'Jira', 'Postman', 'phpMyAdmin', 'Docker', 'Composer', 'npm/yarn', 'CursorAI', 'Bitbucket'
   ];
 
   const languages = [
@@ -70,46 +93,46 @@ const AboutPage: React.FC = () => {
   ];
 
   return (
-    <div className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div className="py-16 bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Animated Header */}
-        <div className="text-center mb-16 animate-fade-in-up">
-          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
+        <div className="text-center mb-12 md:mb-16 animate-fade-in-up">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary-700 to-accent-600 bg-clip-text text-transparent mb-3 md:mb-4">
             About Me
           </h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto leading-7 md:leading-8 font-normal tracking-wide px-4">
             Passionate Web Developer and Ecommerce Team Lead with a proven track record 
             of delivering high-quality solutions and leading successful development teams.
           </p>
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
           {/* Main Biography */}
           <div className="lg:col-span-2 space-y-8">
             {/* Personal Story */}
-            <div className="bg-white rounded-2xl shadow-xl p-8 transform hover:scale-105 transition-all duration-300 animate-fade-in-left">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-4">
-                  <Users className="h-6 w-6 text-white" />
+            <div className="bg-white rounded-2xl shadow-xl p-4 md:p-8 transform hover:scale-105 transition-all duration-300 animate-fade-in-left">
+              <div className="flex items-center mb-4 md:mb-6">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-primary-700 to-accent-600 rounded-full flex items-center justify-center mr-3 md:mr-4">
+                  <Users className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">My Journey</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">My Journey</h2>
               </div>
-              <div className="space-y-6 text-gray-700 leading-relaxed">
-                <p className="text-lg">
-                  With over 7 years and 7 months of experience in web development, I've specialized 
+              <div className="space-y-5 md:space-y-6 text-gray-700">
+                <p className="text-base md:text-lg leading-7 md:leading-8 font-normal tracking-wide">
+                  With over 8 years of experience in web development, I've specialized 
                   in creating robust eCommerce solutions using Magento 2. My journey began as a 
                   developer, and I've grown into a team leader who has successfully managed and 
                   delivered more than 35 Magento projects.
                 </p>
-                <p>
+                <p className="text-base md:text-lg leading-7 md:leading-8 font-normal tracking-wide">
                   Currently serving as an Ecommerce Team Lead at Emvigo Technologies, I combine 
                   my technical expertise with strategic leadership to guide teams in building 
                   exceptional online shopping experiences. My experience spans across various 
                   industries including music, food & grocery, cosmetics, fashion, travel, 
                   jewelry, and electronics.
                 </p>
-                <p>
+                <p className="text-base md:text-lg leading-7 md:leading-8 font-normal tracking-wide">
                   I'm passionate about staying current with the latest eCommerce trends and 
                   technologies, ensuring that every project I lead incorporates best practices 
                   and innovative solutions. My approach focuses on understanding business 
@@ -120,15 +143,15 @@ const AboutPage: React.FC = () => {
             </div>
 
             {/* Professional Achievements Gallery */}
-            <div className="bg-white rounded-2xl shadow-xl p-8 animate-fade-in-left animation-delay-500">
-              <div className="flex items-center mb-8">
-                <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mr-4">
-                  <Trophy className="h-6 w-6 text-white" />
+            <div id="professional-achievements" className="bg-white rounded-2xl shadow-xl p-4 md:p-8 animate-fade-in-left animation-delay-500 scroll-mt-24">
+              <div className="flex items-center mb-6 md:mb-8">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mr-3 md:mr-4">
+                  <Trophy className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">Professional Achievements</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Professional Achievements</h2>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                 {achievements.map((achievement, index) => (
                   <div 
                     key={index}
@@ -156,22 +179,22 @@ const AboutPage: React.FC = () => {
             </div>
 
             {/* Tools & Technologies */}
-            <div className="bg-white rounded-2xl shadow-xl p-8 animate-fade-in-left animation-delay-1000">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mr-4">
-                  <CheckCircle className="h-6 w-6 text-white" />
+            <div className="bg-white rounded-2xl shadow-xl p-4 md:p-8 animate-fade-in-left animation-delay-1000">
+              <div className="flex items-center mb-4 md:mb-6">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-primary-700 to-accent-600 rounded-full flex items-center justify-center mr-3 md:mr-4">
+                  <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">Tools I Master</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Tools I Master</h2>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 {tools.map((tool, index) => (
                   <div 
                     key={index} 
-                    className="group flex items-center p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl hover:from-blue-50 hover:to-purple-50 transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                    className="group flex items-center p-4 bg-gradient-to-r from-slate-50 to-primary-50 rounded-xl hover:from-primary-50 hover:to-accent-50 transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 group-hover:animate-spin" />
-                    <span className="text-gray-800 font-medium group-hover:text-blue-600 transition-colors duration-300">{tool}</span>
+                    <CheckCircle className="h-5 w-5 text-primary-700 mr-3 group-hover:animate-spin" />
+                    <span className="text-gray-800 font-medium group-hover:text-primary-700 transition-colors duration-300">{tool}</span>
                   </div>
                 ))}
               </div>
@@ -179,37 +202,38 @@ const AboutPage: React.FC = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-8">
+          <div className="space-y-6 md:space-y-8">
             {/* Profile Image */}
-            <div className="bg-white rounded-2xl shadow-xl p-6 text-center animate-fade-in-right">
-              <div className="relative inline-block mb-6">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gradient-to-r from-blue-500 to-purple-500 shadow-xl mx-auto animate-float">
+            <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 text-center animate-fade-in-right">
+              <div className="relative inline-block mb-4 md:mb-6">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-2 md:border-4 border-primary-600 shadow-xl mx-auto animate-float">
                   <img 
-                    src="/profilre.png" 
+                    src="/profile_image.jpeg" 
                     alt="ANAS KP"
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full p-2 animate-pulse">
-                  <CheckCircle className="h-4 w-4 text-white" />
+                <div className="absolute -bottom-1 -right-1 md:-bottom-2 md:-right-2 bg-gradient-to-r from-primary-600 to-accent-600 rounded-full p-1.5 md:p-2 animate-pulse">
+                  <CheckCircle className="h-3 w-3 md:h-4 md:w-4 text-white" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">ANAS KP</h3>
-              <p className="text-blue-600 font-medium">Web Developer & Team Lead</p>
+              <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1 md:mb-2">ANAS KP</h3>
+              <p className="text-sm md:text-base text-primary-700 font-medium">Web Developer & Team Lead</p>
             </div>
 
             {/* Quick Facts */}
-            <div className="bg-white rounded-2xl shadow-xl p-6 animate-fade-in-right animation-delay-300">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                <Star className="h-5 w-5 text-yellow-500 mr-2" />
+            <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 animate-fade-in-right animation-delay-300">
+              <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6 flex items-center">
+                <Star className="h-4 w-4 md:h-5 md:w-5 text-yellow-500 mr-2" />
                 Quick Facts
               </h3>
               <div className="space-y-4">
                 {[
                   { icon: MapPin, label: 'Location', value: 'Malappuram, Kerala, India', color: 'text-blue-600' },
-                  { icon: Calendar, label: 'Experience', value: '7+ Years', color: 'text-green-600' },
+                  { icon: Calendar, label: 'Experience', value: '8+ Years', color: 'text-green-600' },
                   { icon: Globe, label: 'Projects Led', value: '35+ Magento Projects', color: 'text-purple-600' },
-                  { icon: Trophy, label: 'Success Rate', value: '100% Client Satisfaction', color: 'text-orange-600' }
+                  { icon: Trophy, label: 'Success Rate', value: '100% Client Satisfaction', color: 'text-orange-600' },
+                  { icon: Award, label: 'Certification', value: 'Adobe Certified Professional', color: 'text-red-600' }
                 ].map((fact, index) => {
                   const Icon = fact.icon;
                   return (
@@ -260,12 +284,12 @@ const AboutPage: React.FC = () => {
               </h3>
               <div className="space-y-3">
                 {languages.map((lang, index) => (
-                  <div key={index} className="flex items-center justify-between group hover:bg-blue-50 p-2 rounded-lg transition-colors duration-200">
+                  <div key={index} className="flex items-center justify-between group hover:bg-primary-50 p-2 rounded-lg transition-colors duration-200">
                     <div className="flex items-center">
-                      <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mr-3 group-hover:animate-ping"></div>
+                      <div className="w-3 h-3 bg-gradient-to-r from-primary-600 to-accent-600 rounded-full mr-3 group-hover:animate-ping"></div>
                       <span className="font-medium text-gray-900">{lang.name}</span>
                     </div>
-                    <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors duration-200">
+                    <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors duration-200">
                       {lang.level}
                     </span>
                   </div>
@@ -274,16 +298,16 @@ const AboutPage: React.FC = () => {
             </div>
 
             {/* Core Values */}
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-xl p-6 animate-fade-in-right animation-delay-1200">
+            <div className="bg-gradient-to-br from-primary-50 to-accent-50 rounded-2xl shadow-xl p-6 animate-fade-in-right animation-delay-1200">
               <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <CheckCircle className="h-5 w-5 text-purple-600 mr-2" />
+                <CheckCircle className="h-5 w-5 text-primary-700 mr-2" />
                 Core Values
               </h3>
               <div className="space-y-3">
-                {['Quality First', 'Team Collaboration', 'Continuous Learning', 'Client Success'].map((value, index) => (
+                {['Quality First', 'Team Collaboration', 'Continuous Learning', 'Client Success', 'Innovation & Excellence', 'Timely Delivery'].map((value, index) => (
                   <div key={index} className="flex items-center group hover:bg-white/50 p-2 rounded-lg transition-colors duration-200">
-                    <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-3 group-hover:animate-pulse"></div>
-                    <span className="text-gray-800 font-medium group-hover:text-purple-600 transition-colors duration-200">{value}</span>
+                    <div className="w-2 h-2 bg-gradient-to-r from-primary-600 to-accent-600 rounded-full mr-3 group-hover:animate-pulse"></div>
+                    <span className="text-gray-800 font-medium group-hover:text-primary-700 transition-colors duration-200">{value}</span>
                   </div>
                 ))}
               </div>
@@ -293,18 +317,18 @@ const AboutPage: React.FC = () => {
 
         {/* Call to Action */}
         <div className="mt-16 text-center animate-fade-in-up">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl p-8 text-white">
+          <div className="bg-gradient-to-r from-primary-700 to-accent-600 rounded-2xl shadow-2xl p-8 text-white">
             <h2 className="text-3xl font-bold mb-4">Ready to Work Together?</h2>
-            <p className="text-xl text-blue-100 mb-6">
+            <p className="text-xl text-primary-100 mb-6">
               Let's create something amazing for your business
             </p>
-            <a
-              href="/contact"
+            <button
+              onClick={openModal}
               className="inline-flex items-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-full hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             >
               <Camera className="h-5 w-5 mr-2" />
               Get In Touch
-            </a>
+            </button>
           </div>
         </div>
       </div>

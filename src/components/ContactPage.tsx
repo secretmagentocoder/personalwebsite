@@ -1,17 +1,30 @@
-import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle, ExternalLink, Linkedin, Github, MessageCircle, Clock, Award, Zap, AlertCircle, Loader } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, Phone, MapPin, Send, CheckCircle, Clock, Award, AlertCircle, Loader, MessageCircle, Briefcase, Code2, Zap, Linkedin } from 'lucide-react';
 import emailjs from '@emailjs/browser';
+import { emailjsConfig, prepareEmailParams } from '../config/emailjs.config';
+import { sanitizeFormData, checkRateLimit } from '../utils/security';
 
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     subject: '',
     message: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Initialize EmailJS
+  useEffect(() => {
+    try {
+      emailjs.init(emailjsConfig.publicKey);
+      console.log('EmailJS initialized successfully');
+    } catch (error) {
+      console.error('EmailJS initialization error:', error);
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -20,67 +33,96 @@ const ContactPage: React.FC = () => {
     });
   };
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   console.log('Form submitted:', formData);
-  //   setIsSubmitted(true);
-    
-  //   setTimeout(() => {
-  //     setIsSubmitted(false);
-  //     setFormData({ name: '', email: '', subject: '', message: '' });
-  //   }, 3000);
-  // };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Reset states
     setIsLoading(true);
     setError('');
 
+    // Rate limiting check
+    if (!checkRateLimit('contact_form', 5, 60000)) {
+      setError('Too many requests. Please wait a minute before trying again.');
+      setIsLoading(false);
+      return;
+    }
+
+    // Sanitize and validate form data
+    const sanitized = sanitizeFormData(formData);
+    if (!sanitized.isValid) {
+      setError(sanitized.errors.join('. '));
+      setIsLoading(false);
+      return;
+    }
+
+    // Try EmailJS first
     try {
-      // EmailJS configuration - REPLACE THESE WITH YOUR ACTUAL VALUES
-      const serviceID = 'service_68afgse'; // Replace with your EmailJS service ID
-      const templateID = 'template_vym6kik'; // Replace with your EmailJS template ID
-      const publicKey = 'rWAnWDHGYERdj6-7I'; // Replace with your EmailJS public key
+      // Prepare template parameters using config helper - include phone in message
+      const messageWithPhone = sanitized.phone 
+        ? `${sanitized.message}\n\nContact Phone: ${sanitized.phone}`
+        : sanitized.message;
 
-      // Check if EmailJS is properly configured
-      // if (serviceID === 'service_68afgse' || templateID === 'template_8lo6bpr') {
-      //   throw new Error('EmailJS not configured. Please set up your EmailJS credentials.');
-      // }
+      const templateParams = prepareEmailParams({
+        name: sanitized.name,
+        email: sanitized.email,
+        subject: sanitized.subject,
+        message: messageWithPhone,
+      });
 
-      // Prepare template parameters
-      const templateParams = {
-        from_name: formData.name,
-        from_email: formData.email,
-        subject: formData.subject,
-        message: formData.message,
-        to_email: 'anasmagento@gmail.com', // Your Hostinger email
-      };
+      console.log('Sending email via EmailJS with params:', templateParams);
+      console.log('Using config:', {
+        serviceID: emailjsConfig.serviceID,
+        templateID: emailjsConfig.templateID,
+        recipientEmail: emailjsConfig.recipientEmail,
+      });
 
-      // Send email using EmailJS
-      const result = await emailjs.send(
-        serviceID,
-        templateID,
+      // Send email using EmailJS with config values
+      const response = await emailjs.send(
+        emailjsConfig.serviceID,
+        emailjsConfig.templateID,
         templateParams,
-        publicKey
+        emailjsConfig.publicKey
       );
-
-      console.log('Email sent successfully:', result);
-      setIsSubmitted(true);
       
-      // Reset form after 5 seconds
-      setTimeout(() => {
-        setIsSubmitted(false);
-        setFormData({ name: '', email: '', subject: '', message: '' });
-      }, 5000);
+      console.log('EmailJS response:', response);
 
-    } catch (error) {
-      console.error('Failed to send email:', error);
-      if (error instanceof Error && error.message.includes('EmailJS not configured')) {
-        setError('EmailJS is not configured yet. Please check the setup instructions below.');
+      if (response.status === 200 || response.text === 'OK') {
+        setIsSubmitted(true);
+        setTimeout(() => {
+          setIsSubmitted(false);
+          setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+        }, 5000);
       } else {
-        setError('Failed to send message. Please try again or contact me directly.');
+        throw new Error(`EmailJS returned status: ${response.status}`);
       }
+    } catch (error: any) {
+      console.error('Failed to send email:', error);
+      
+      // Detailed error messages
+      let errorMessage = 'Failed to send message. ';
+      
+      if (error?.text) {
+        errorMessage += `Error: ${error.text}. `;
+      } else if (error?.message) {
+        errorMessage += `Error: ${error.message}. `;
+      } else if (error?.status) {
+        errorMessage += `HTTP Status: ${error.status}. `;
+      }
+      
+      errorMessage += 'Please try again or use the email link below.';
+      setError(errorMessage);
+      
+      // Log full error for debugging
+      console.error('Full error details:', {
+        error,
+        errorType: typeof error,
+        errorKeys: Object.keys(error || {}),
+        emailjsConfig: {
+          serviceID: emailjsConfig.serviceID,
+          templateID: emailjsConfig.templateID,
+          publicKey: emailjsConfig.publicKey.substring(0, 10) + '...', // Partial key for security
+        },
+        formData
+      });
     } finally {
       setIsLoading(false);
     }
@@ -92,84 +134,101 @@ const ContactPage: React.FC = () => {
       title: 'Email',
       value: 'anasmagento@gmail.com',
       link: 'mailto:anasmagento@gmail.com',
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-primary-600 to-primary-800'
     },
     {
       icon: Phone,
       title: 'Phone',
-      value: '+91 9809520367',
-      link: 'tel:+919809520367',
-      color: 'from-green-500 to-emerald-500'
+      value: '+91 8891120367',
+      link: 'tel:+918891120367',
+      color: 'from-accent-500 to-accent-600'
+    },
+    {
+      icon: MessageCircle,
+      title: 'WhatsApp',
+      value: '+91 8891120367',
+      link: 'https://wa.me/918891120367?text=Hello%20Anas%2C%20I%20would%20like%20to%20discuss%20a%20project%20with%20you.',
+      color: 'from-green-500 to-emerald-600'
+    },
+    {
+      icon: Linkedin,
+      title: 'LinkedIn',
+      value: 'anasmagento',
+      link: 'https://linkedin.com/in/anasmagento',
+      color: 'from-blue-600 to-blue-700'
     },
     {
       icon: MapPin,
       title: 'Location',
       value: 'Malappuram, Kerala, India',
       link: '#',
-      color: 'from-purple-500 to-pink-500'
+      color: 'from-primary-600 to-primary-800'
     }
   ];
 
   const services = [
     {
-      title: 'Company Websites',
-      description: 'Professional corporate websites with modern design and functionality',
-      icon: Award,
-      color: 'from-blue-500 to-cyan-500'
+      title: 'Business Websites',
+      description: 'Scalable corporate solutions with modern architecture',
+      icon: Briefcase,
+      color: 'from-primary-600 to-primary-800'
     },
     {
       title: 'Portfolio Development',
-      description: 'Stunning portfolios that showcase your work and achievements',
-      icon: ExternalLink,
-      color: 'from-purple-500 to-pink-500'
+      description: 'Professional portfolios showcasing your expertise',
+      icon: Code2,
+      color: 'from-primary-600 to-accent-600'
     },
     {
       title: 'eCommerce Solutions',
-      description: 'Complete Magento eCommerce platforms with advanced features',
-      icon: Zap,
-      color: 'from-green-500 to-emerald-500'
+      description: 'Complete Magento 2 platforms with custom modules',
+      icon: Award,
+      color: 'from-accent-500 to-accent-600'
     },
     {
       title: 'Custom Development',
-      description: 'Tailored web solutions for your unique business requirements',
-      icon: MessageCircle,
-      color: 'from-orange-500 to-red-500'
+      description: 'Tailored solutions for unique requirements',
+      icon: Zap,
+      color: 'from-primary-700 to-accent-600'
     }
   ];
 
+
   return (
-    <div className="py-16 bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Animated Header */}
-        <div className="text-center mb-16 animate-fade-in-up">
-          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
-            Let's Work Together
+    <div className="bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Professional Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary-700 to-accent-600 rounded-2xl mb-4 shadow-lg">
+            <MessageCircle className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary-700 via-accent-600 to-primary-800 bg-clip-text text-transparent mb-4 tracking-tight">
+            Get In Touch
           </h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-            Ready to bring your digital vision to life? Whether it's a company website, 
-            portfolio, or eCommerce platform, I'm here to help you succeed.
+          <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+            Have a question or want to discuss a project? I'm here to help. 
+            Whether you need a business website, portfolio, eCommerce platform, or just want to connect, feel free to reach out.
           </p>
         </div>
 
         {/* Services Overview */}
-        <div className="mb-16 animate-fade-in-up animation-delay-300">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">What I Can Build For You</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-6 text-center">What I Can Help You With</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {services.map((service, index) => {
               const Icon = service.icon;
               return (
                 <div 
                   key={index}
-                  className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group"
-                  style={{ animationDelay: `${index * 150}ms` }}
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200 p-5 group"
                 >
-                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r ${service.color} mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r ${service.color} mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                     <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">
+                  <h3 className="text-base font-bold text-slate-900 mb-2 group-hover:text-primary-700 transition-colors">
                     {service.title}
                   </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
+                  <p className="text-slate-600 text-sm leading-relaxed">
                     {service.description}
                   </p>
                 </div>
@@ -178,20 +237,41 @@ const ContactPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <div className="bg-white rounded-2xl shadow-2xl p-8 animate-fade-in-left">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-              <MessageCircle className="h-8 w-8 text-blue-600 mr-3" />
-              Send Me a Message
-            </h2>
-            
-            {!isSubmitted ? (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="group">
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name *
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column: Form and Response Time */}
+          <div className="space-y-6">
+            {/* Contact Form */}
+            <div className="bg-white rounded-2xl shadow-xl p-4 md:p-8 border border-slate-200 relative overflow-hidden">
+              {/* Decorative top border */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-700 via-accent-600 to-primary-800"></div>
+              
+              <div className="mb-4 md:mb-6 pb-3 md:pb-4 border-b border-slate-200">
+                <div className="flex items-start">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-primary-700 to-accent-600 rounded-lg md:rounded-xl flex items-center justify-center mr-3 md:mr-4 shadow-lg flex-shrink-0">
+                    <MessageCircle className="h-5 w-5 md:h-6 md:w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-2 md:mb-3">
+                      Send a Message
+                    </h2>
+                    <div className="flex items-start gap-1.5 md:gap-2 bg-gradient-to-r from-primary-50 to-accent-50 rounded-lg px-3 md:px-4 py-2 md:py-2.5 border-l-4 border-primary-600">
+                      <span className="text-primary-700 text-xl md:text-2xl font-bold leading-none mt-0.5">"</span>
+                      <p className="text-slate-700 text-xs md:text-sm font-medium italic flex-1 leading-relaxed">
+                        Let's discuss how I can help bring your project to life
+                      </p>
+                      <span className="text-primary-700 text-xl md:text-2xl font-bold leading-none mt-0.5">"</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {!isSubmitted ? (
+                <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                {/* Name and Email Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2.5">
+                      Full Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -200,13 +280,13 @@ const ContactPage: React.FC = () => {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:border-blue-300"
-                      placeholder="Your Name"
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 hover:border-slate-300"
+                      placeholder="John Doe"
                     />
                   </div>
-                  <div className="group">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address *
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2.5">
+                      Email Address <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="email"
@@ -215,37 +295,57 @@ const ContactPage: React.FC = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:border-blue-300"
-                      placeholder="your@email.com"
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 hover:border-slate-300"
+                      placeholder="john@example.com"
                     />
                   </div>
                 </div>
-                
-                <div className="group">
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                    Project Type *
-                  </label>
-                  <select
-                    id="subject"
-                    name="subject"
-                    required
-                    value={formData.subject}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:border-blue-300"
-                  >
-                    <option value="">Select project type</option>
-                    <option value="company-website">Company Website</option>
-                    <option value="portfolio">Portfolio Development</option>
-                    <option value="ecommerce">eCommerce Platform</option>
-                    <option value="custom-development">Custom Development</option>
-                    <option value="consultation">Consultation</option>
-                    <option value="other">Other</option>
-                  </select>
+
+                {/* Phone and Subject Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2.5">
+                      <Phone className="h-4 w-4 inline mr-1.5 text-primary-600" />
+                      Mobile Number
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 hover:border-slate-300"
+                      placeholder="+91 1234567890"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="subject" className="block text-sm font-semibold text-slate-700 mb-2.5">
+                      Inquiry Type <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="subject"
+                      name="subject"
+                      required
+                      value={formData.subject}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 hover:border-slate-300"
+                    >
+                      <option value="">Select inquiry type</option>
+                      <option value="General Inquiry">General Inquiry</option>
+                      <option value="Business Website">Business Website</option>
+                      <option value="Portfolio Development">Portfolio Development</option>
+                      <option value="eCommerce Platform">eCommerce Platform (Magento 2)</option>
+                      <option value="Custom Development">Custom Development</option>
+                      <option value="Consultation">Consultation</option>
+                      <option value="Job Opportunity">Job Opportunity</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
                 </div>
                 
-                <div className="group">
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                    Project Details *
+                <div>
+                  <label htmlFor="message" className="block text-sm font-semibold text-slate-700 mb-2.5">
+                    Description <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     id="message"
@@ -254,74 +354,129 @@ const ContactPage: React.FC = () => {
                     rows={6}
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 resize-none group-hover:border-blue-300"
-                    placeholder="Tell me about your project requirements, timeline, budget, and any specific features you need..."
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 resize-none bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 hover:border-slate-300"
+                    placeholder="Please describe your inquiry, requirements, or any questions you have..."
                   ></textarea>
                 </div>
                 
                 {error && (
-                  <div className="flex items-center bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" role="alert">
-                    <AlertCircle className="h-5 w-5 mr-2" />
-                    <span>{error}</span>
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    <div className="flex items-start">
+                      <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium mb-1">{error}</p>
+                        <a 
+                          href={`mailto:anasmagento@gmail.com?subject=${encodeURIComponent(formData.subject || 'Contact Form')}&body=${encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}${formData.phone ? `\nPhone: ${formData.phone}` : ''}\n\nMessage:\n${formData.message}`)}`}
+                          className="text-xs text-red-600 underline hover:text-red-800"
+                        >
+                          Or click here to send via email client
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 )}
                 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center transform hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-primary-700 via-accent-600 to-primary-800 text-white font-semibold py-4 px-6 rounded-xl hover:from-primary-800 hover:via-accent-700 hover:to-primary-900 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-2xl transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
                   {isLoading ? (
                     <>
                       <Loader className="animate-spin h-5 w-5 mr-2" />
-                      Sending...
+                      Sending Message...
                     </>
                   ) : (
                     <>
-                      <Send className="h-5 w-5 mr-2" />
+                      <Send className="h-5 w-5 mr-2 group-hover:translate-x-1 transition-transform" />
                       Send Message
                     </>
                   )}
                 </button>
               </form>
             ) : (
-              <div className="text-center py-12 animate-bounce-in">
-                <CheckCircle className="h-20 w-20 text-green-500 mx-auto mb-6" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Message Sent Successfully!</h3>
-                <p className="text-gray-600 text-lg">
-                  Thank you for your message. I'll get back to you within 24 hours with a detailed response.
+              <div className="text-center py-12">
+                <CheckCircle className="h-20 w-20 text-primary-700 mx-auto mb-6" />
+                <h3 className="text-2xl font-bold text-slate-900 mb-4">Message Sent Successfully!</h3>
+                <p className="text-slate-600 text-lg mb-2">
+                  Thank you for reaching out. I've received your message and will respond within 24 hours.
+                </p>
+                <p className="text-sm text-slate-500">
+                  I'll get back to you with a detailed response and next steps.
                 </p>
               </div>
             )}
+            </div>
+
+            {/* Response Time Promise */}
+            <div className="bg-gradient-to-br from-primary-50 via-accent-50 to-primary-50 rounded-2xl shadow-xl p-6 border border-primary-200 relative overflow-hidden">
+              {/* Decorative element */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-200/20 rounded-full -mr-16 -mt-16"></div>
+              
+              <div className="flex items-center mb-4 pb-3 border-b border-primary-200 relative z-10">
+                <div className="w-10 h-10 bg-gradient-to-r from-primary-700 to-accent-600 rounded-lg flex items-center justify-center mr-3 shadow-lg">
+                  <Clock className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  Response Time Commitment
+                </h2>
+              </div>
+              <div className="space-y-3 relative z-10">
+                {[
+                  { time: '< 24 hours', action: 'Initial response to your inquiry', icon: '⚡' },
+                  { time: '< 48 hours', action: 'Detailed project discussion call', icon: '📞' },
+                  { time: '< 72 hours', action: 'Complete project proposal & timeline', icon: '📋' }
+                ].map((promise, index) => (
+                  <div key={index} className="flex items-start group hover:bg-white/70 p-3 rounded-lg transition-all duration-200 border border-transparent hover:border-primary-200">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-primary-600 to-accent-600 rounded-lg flex items-center justify-center mr-3 shadow-md group-hover:scale-110 transition-transform">
+                      <span className="text-white text-base">{promise.icon}</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold text-primary-700 text-sm mb-0.5">{promise.time}</div>
+                      <div className="text-slate-600 text-xs leading-relaxed">{promise.action}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Contact Information */}
-          <div className="space-y-8">
+          {/* Right Column: Contact Information & Details */}
+          <div className="space-y-6">
             {/* Contact Details */}
-            <div className="bg-white rounded-2xl shadow-2xl p-8 animate-fade-in-right">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                <Phone className="h-8 w-8 text-green-600 mr-3" />
-                Contact Information
-              </h2>
-              <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-xl p-6 border border-slate-200 relative overflow-hidden">
+              {/* Decorative top border */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-600 via-primary-700 to-accent-600"></div>
+              
+              <div className="flex items-center mb-4 pb-3 border-b border-slate-200">
+                <div className="w-10 h-10 bg-gradient-to-r from-accent-600 to-primary-700 rounded-lg flex items-center justify-center mr-3 shadow-lg">
+                  <Phone className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  Contact Information
+                </h2>
+              </div>
+              <div className="space-y-3">
                 {contactInfo.map((contact, index) => {
                   const Icon = contact.icon;
                   return (
-                    <div key={index} className="group flex items-center hover:bg-gray-50 p-4 rounded-xl transition-colors duration-300">
-                      <div className={`w-14 h-14 bg-gradient-to-r ${contact.color} rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300`}>
-                        <Icon className="h-7 w-7 text-white" />
+                    <div key={index} className="flex items-center group hover:bg-slate-50 p-3 rounded-lg transition-all duration-200 border border-transparent hover:border-slate-200 hover:shadow-sm">
+                      <div className={`w-10 h-10 bg-gradient-to-r ${contact.color} rounded-lg flex items-center justify-center mr-3 shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                        <Icon className="h-5 w-5 text-white" />
                       </div>
-                      <div>
-                        <div className="font-semibold text-gray-900 text-lg">{contact.title}</div>
-                        {contact.link.startsWith('mailto:') || contact.link.startsWith('tel:') ? (
+                      <div className="flex-1">
+                        <div className="font-semibold text-slate-900 text-sm mb-0.5">{contact.title}</div>
+                        {contact.link.startsWith('mailto:') || contact.link.startsWith('tel:') || contact.link.startsWith('http') ? (
                           <a
                             href={contact.link}
-                            className="text-gray-600 hover:text-blue-600 transition-colors duration-300 text-lg"
+                            target={contact.link.startsWith('http') ? '_blank' : undefined}
+                            rel={contact.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+                            className="text-slate-600 hover:text-primary-700 transition-colors text-sm font-medium group-hover:underline"
                           >
                             {contact.value}
                           </a>
                         ) : (
-                          <div className="text-gray-600 text-lg">{contact.value}</div>
+                          <div className="text-slate-600 text-sm font-medium">{contact.value}</div>
                         )}
                       </div>
                     </div>
@@ -330,101 +485,35 @@ const ContactPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Professional Photo */}
-            <div className="bg-white rounded-2xl shadow-2xl p-8 text-center animate-fade-in-right animation-delay-300">
-              <div className="relative inline-block mb-6">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gradient-to-r from-blue-500 to-purple-500 shadow-xl mx-auto animate-float">
-                  <img 
-                    src="/profilre.png" 
-                    alt="ANAS KP - Web Developer"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full p-2 animate-pulse">
-                  <CheckCircle className="h-4 w-4 text-white" />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">ANAS KP</h3>
-              <p className="text-blue-600 font-medium mb-4">Web Developer & Team Lead</p>
-              <p className="text-gray-600 text-sm">
-                Ready to transform your ideas into digital reality
-              </p>
-            </div>
-
-            {/* Response Time Promise */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-xl p-8 animate-fade-in-right animation-delay-600">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Clock className="h-6 w-6 text-green-600 mr-3" />
-                Response Time Promise
-              </h2>
-              <div className="space-y-4">
-                {[
-                  { time: '< 24 hours', action: 'Initial response to your inquiry' },
-                  { time: '< 48 hours', action: 'Detailed project discussion call' },
-                  { time: '< 72 hours', action: 'Complete project proposal & timeline' }
-                ].map((promise, index) => (
-                  <div key={index} className="flex items-center group hover:bg-white/50 p-3 rounded-lg transition-colors duration-200">
-                    <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mr-4 group-hover:animate-ping"></div>
-                    <div>
-                      <div className="font-semibold text-green-700">{promise.time}</div>
-                      <div className="text-gray-600 text-sm">{promise.action}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Why Choose Me */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl shadow-xl p-8 animate-fade-in-right animation-delay-900">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Award className="h-6 w-6 text-blue-600 mr-3" />
-                Why Choose Me?
-              </h2>
-              <div className="space-y-3">
+            <div className="bg-gradient-to-br from-primary-50 via-accent-50 to-primary-50 rounded-2xl shadow-xl p-6 border border-primary-200 relative overflow-hidden">
+              {/* Decorative element */}
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent-200/20 rounded-full -ml-16 -mb-16"></div>
+              
+              <div className="flex items-center mb-4 pb-3 border-b border-primary-200 relative z-10">
+                <div className="w-10 h-10 bg-gradient-to-r from-accent-600 to-primary-700 rounded-lg flex items-center justify-center mr-3 shadow-lg">
+                  <Award className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  Why Work With Me?
+                </h2>
+              </div>
+              <div className="space-y-3 relative z-10">
                 {[
-                  '7+ years of proven experience',
+                  '8+ years of proven eCommerce expertise',
                   '35+ successful projects delivered',
                   '100% client satisfaction rate',
                   'Adobe Certified Professional',
-                  'Full-stack development expertise',
+                  'Full-stack development capabilities',
                   'Ongoing support & maintenance'
                 ].map((benefit, index) => (
-                  <div key={index} className="flex items-center group hover:bg-white/50 p-2 rounded-lg transition-colors duration-200">
-                    <CheckCircle className="h-5 w-5 text-blue-600 mr-3 group-hover:animate-spin" />
-                    <span className="text-gray-800 font-medium group-hover:text-blue-600 transition-colors duration-200">{benefit}</span>
+                  <div key={index} className="flex items-center group hover:bg-white/70 p-3 rounded-lg transition-all duration-200 border border-transparent hover:border-primary-200">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-primary-600 to-accent-600 rounded-lg flex items-center justify-center mr-3 shadow-md group-hover:scale-110 transition-transform">
+                      <CheckCircle className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="text-slate-800 font-medium text-sm group-hover:text-primary-700 transition-colors">{benefit}</span>
                   </div>
                 ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <div className="mt-16 text-center animate-fade-in-up animation-delay-1200">
-          <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-2xl shadow-2xl p-8 text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-black opacity-20"></div>
-            <div className="relative">
-              <h2 className="text-3xl font-bold mb-4">
-                Ready to Start Your Project?
-              </h2>
-              <p className="text-xl text-pink-100 mb-6">
-                Don't wait - let's turn your vision into reality today!
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
-                  href="mailto:anasmagento@gmail.com"
-                  className="inline-flex items-center px-8 py-4 bg-white text-purple-600 font-semibold rounded-full hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
-                >
-                  <Mail className="h-5 w-5 mr-2" />
-                  Email Me Now
-                </a>
-                <a
-                  href="tel:+919809520367"
-                  className="inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-purple-600 transition-all duration-300 transform hover:scale-105"
-                >
-                  <Phone className="h-5 w-5 mr-2" />
-                  Call Me
-                </a>
               </div>
             </div>
           </div>
