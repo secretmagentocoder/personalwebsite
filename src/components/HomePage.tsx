@@ -350,11 +350,6 @@ const HomePage: React.FC = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent"></div>
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-primary-900/10"></div>
                     </div>
-
-                    {/* Certification Badge - Refined Positioning */}
-                    <div className="absolute -bottom-2 -right-2 md:-bottom-5 md:-right-5 bg-gradient-to-br from-accent-500 via-accent-600 to-primary-700 rounded-lg md:rounded-xl p-2 md:p-3 shadow-2xl border-2 md:border-4 border-slate-900 transform group-hover:scale-110 transition-transform duration-300">
-                      <Award className="h-5 w-5 md:h-7 md:w-7 text-white" />
-                    </div>
                   </div>
 
                   {/* Professional Accent Line - Refined */}
