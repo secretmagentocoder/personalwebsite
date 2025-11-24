@@ -2,28 +2,27 @@
 
 Professional portfolio website built with React, TypeScript, Vite, and Tailwind CSS.
 
+🌐 **Live Website:** [https://anaskp.com](https://anaskp.com)
+
 ## 🚀 Quick Start
 
-### Start Development Server
+### Development Setup
 ```bash
-cd /var/www/html/anas.local
-npm run dev
+npm install      # Install dependencies
+npm run dev      # Start development server
 ```
 
-### Access Website
-- **Via Virtual Host:** http://anas.local
-- **Direct Vite Server:** http://localhost:5173
+### Production Build
+```bash
+npm run build    # Build for production
+npm run preview  # Preview production build locally
+```
 
 ## 📋 Prerequisites
 
 - Node.js (v20+)
 - npm
-- Apache web server
-- Virtual host configured
-
-## 📖 Full Setup Guide
-
-For detailed setup instructions, troubleshooting, and production deployment, see **[SETUP_GUIDE.md](./SETUP_GUIDE.md)**
+- Apache web server (for production)
 
 ## 🛠️ Available Commands
 
@@ -34,11 +33,11 @@ npm run preview  # Preview production build
 npm run lint     # Run ESLint
 ```
 
-## ⚠️ Important Notes
+## 📖 Documentation
 
-- **Always start the Vite dev server before accessing anas.local**
-- The dev server must be running for the Apache proxy to work
-- Changes are hot-reloaded automatically
+- **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** - Development setup and troubleshooting
+- **[PRODUCTION_DEPLOYMENT.md](./PRODUCTION_DEPLOYMENT.md)** - Production deployment guide
+- **[SECURITY.md](./SECURITY.md)** - Security measures and best practices
 
 ## 🏗️ Tech Stack
 
